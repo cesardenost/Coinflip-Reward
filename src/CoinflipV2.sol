@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Compatible with OpenZeppelin Contracts ^5.0.0
 pragma solidity ^0.8.23;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -15,7 +16,7 @@ contract CoinflipV2 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     // Initializer instead of a constructor for UUPS
     function initialize(address initialOwner) initializer public {
-        __Ownable_init();  // Initialize Ownable logic
+        __Ownable_init(initialOwner);  // Initialize Ownable logic
         __UUPSUpgradeable_init();  // Initialize UUPS logic
         seed = "It is a good practice to rotate seeds often in gambling";
         transferOwnership(initialOwner);

@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+// Compatible with OpenZeppelin Contracts ^5.0.0
+
 pragma solidity ^0.8.23;
 
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -16,7 +18,7 @@ contract Coinflip is Initializable, OwnableUpgradeable, UUPSUpgradeable {
 
     // Initializer instead of a constructor for UUPS
     function initialize(address initialOwner) initializer public {
-        __Ownable_init();  // Initialize Ownable logic
+        __Ownable_init(initialOwner);  // Initialize Ownable logic
         __UUPSUpgradeable_init();  // Initialize UUPS logic
         seed = "It is a good practice to rotate seeds often in gambling";
         transferOwnership(initialOwner);
@@ -48,18 +50,33 @@ contract Coinflip is Initializable, OwnableUpgradeable, UUPSUpgradeable {
         seed = NewSeed;
     }
 
-    // -------------------- helper functions -------------------- //
+// -------------------- helper functions -------------------- //
     /// @notice This function generates 10 random flips by hashing characters of the seed
     /// @return a fixed 10 element array of type uint8 with only 1 or 0 as its elements
-    function getFlips() public view returns(uint8[10] memory){
-        bytes memory seedBytes = bytes(seed);
+    function getFlips() public view returns (uint8[10] memory) {
+        // Casting the seed into a bytes array and getting its length
+        bytes memory stringInBytes = bytes(seed);
+        uint seedLength = stringInBytes.length;
+
+        // Initializing an empty fixed array with 10 uint8 elements
         uint8[10] memory flips;
 
-        for (uint i = 0; i < 10; i++) {
-            uint randomNum = uint(keccak256(abi.encode(seedBytes, i))); 
-            flips[i] = uint8(randomNum % 2);  
-        }
+        // Setting the interval for grabbing characters
+        uint interval = seedLength / 10;
 
+        // Defining a for loop that iterates 10 times to generate each flip
+        for (uint i = 0; i < 10; i++){
+            // Generating a pseudo-random number by hashing together the character and the block timestamp
+            uint randomNum = uint(keccak256(abi.encode(stringInBytes[i*interval], block.timestamp)));
+            
+            // If the result is an even unsigned integer, record it as 1 in the results array, otherwise record it as zero
+            if (randomNum % 2 == 0) {
+                flips[i] = 1;
+            } else {
+                flips[i] = 0;
+            }
+        }
+        // Returning the resulting fixed array
         return flips;
     }
 
